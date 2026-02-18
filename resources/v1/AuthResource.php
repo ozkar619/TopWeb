@@ -27,10 +27,11 @@ class AuthResource
         if (!empty($data->email) && !empty($data->password)) {
             if ($this->user->findByEmail($data->email)) {
                 if ($this->user->verifyPassword($data->password)) {
-                    if ($this->token->create($this->user->id)) {
+                    // Verificar si el usuario ya tiene un token activo
+                    if ($this->token->findActiveByUser($this->user->id)) {
                         http_response_code(200);
                         echo json_encode(array(
-                            "message" => "Login exitoso",
+                            "message" => "Login exitoso - usando token existente",
                             "token" => $this->token->token,
                             "expires_at" => $this->token->expires_at,
                             "user" => array(
@@ -40,8 +41,23 @@ class AuthResource
                             )
                         ));
                     } else {
-                        http_response_code(503);
-                        echo json_encode(array("message" => "Error al generar token"));
+                        // Crear nuevo token si no tiene uno activo
+                        if ($this->token->create($this->user->id)) {
+                            http_response_code(200);
+                            echo json_encode(array(
+                                "message" => "Login exitoso - nuevo token creado",
+                                "token" => $this->token->token,
+                                "expires_at" => $this->token->expires_at,
+                                "user" => array(
+                                    "id" => $this->user->id,
+                                    "username" => $this->user->username,
+                                    "email" => $this->user->email
+                                )
+                            ));
+                        } else {
+                            http_response_code(503);
+                            echo json_encode(array("message" => "Error al generar token"));
+                        }
                     }
                 } else {
                     http_response_code(401);

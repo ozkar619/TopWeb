@@ -37,6 +37,30 @@ class ApiToken
         return false;
     }
 
+    public function findActiveByUser($user_id)
+    {
+        $query = "SELECT id, token, expires_at, created_at 
+                  FROM " . $this->table_name . " 
+                  WHERE user_id = :user_id AND revoked = FALSE AND expires_at > NOW() 
+                  ORDER BY created_at DESC 
+                  LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            $this->id = $row['id'];
+            $this->token = $row['token'];
+            $this->expires_at = $row['expires_at'];
+            $this->created_at = $row['created_at'];
+            return true;
+        }
+        return false;
+    }
+
     public function findByToken($token)
     {
         $query = "SELECT t.*, u.username, u.email, u.status 
