@@ -7,6 +7,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 require_once '../core/Router.php';
 require_once '../resources/v1/UserResource.php';
 require_once '../resources/v1/AuthResource.php';
+require_once '../resources/v1/TokenResource.php';
 
 $scriptName = dirname($_SERVER['SCRIPT_NAME']);
 $basePath = $scriptName;
@@ -14,18 +15,25 @@ $basePath = $scriptName;
 $router = new Router('v1', $basePath);
 $userResource = new UserResource();
 $authResource = new AuthResource();
+$tokenResource = new TokenResource();
 
 // rutas users existentes
 $router->addRoute('GET', '/users', [$userResource, 'index']);
-$router->addRoute('GET', '/users/{id}', [$userResource, 'show']);
-$router->addRoute('POST', '/users', [$userResource, 'store']);
-$router->addRoute('PUT', '/users/{id}', [$userResource, 'update']);
-$router->addRoute('DELETE', '/users/{id}', [$userResource, 'destroy']);
+//$router->addRoute('GET', '/users/{id}', [$userResource, 'show']);
+//$router->addRoute('POST', '/users', [$userResource, 'store']);
+//$router->addRoute('PUT', '/users/{id}', [$userResource, 'update']);
+//$router->addRoute('DELETE', '/users/{id}', [$userResource, 'destroy']);
 
 // rutas de autenticación
 $router->addRoute('POST', '/login', [$authResource, 'login']);
 $router->addRoute('POST', '/logout', [$authResource, 'logout']);
-$router->addRoute('POST', '/register', [$authResource, 'register']);
+//$router->addRoute('POST', '/register', [$authResource, 'register']);
+
+// rutas de tokens
+$router->addRoute('GET', '/tokens', [$tokenResource, 'index']);
+$router->addRoute('GET', '/tokens/{id}', [$tokenResource, 'show']);
+$router->addRoute('GET', '/tokens/active', [$tokenResource, 'active']);
+$router->addRoute('GET', '/tokens/user/{user_id}', [$tokenResource, 'byUser']);
 
 $router->dispatch();
 ?>
